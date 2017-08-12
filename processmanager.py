@@ -1,15 +1,9 @@
 #!/usr/bin/env python
 
 import json
-import web
 import subprocess
 import threading
-
-urls = (
-    '/process', 'processFilter',
-)
-
-process_map = {}
+import web
 
 def getProcessName(process):
     return process_map[process["command"][0]]
@@ -37,9 +31,17 @@ class processFilter:
         for process in processList:
             if (process["state"]=="running"):
                 d=threading.Thread(name='daemon', target=execute(process))
+                d.setDaemon(True)
             elif (process["state"]=="stopped"):
                 d=threading.Thread(name='daemon', target=stop(process_map[getProcessName(process)]))
-            
+                d.setDaemon(True)
+
+urls = (
+    '/process', 'processFilter',
+)
+
+process_map = {}
+
 if __name__ == "__main__":
     app = web.application(urls, globals())
     app.run()
